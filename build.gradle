@@ -40,8 +40,7 @@ android {
 	}
 }
 
-group = 'onl.oss.androidx'
-archivesBaseName = 'lifecycle-util'
+archivesBaseName = 'androidx-lifecycle-util'
 version = '0.1'
 
 repositories {
@@ -103,6 +102,8 @@ afterEvaluate {
 	publishing {
 		publications {
 			mavenJava(MavenPublication) {
+				groupId 'onl.oss.androidx'
+				artifactId 'lifecycle-util'
 				from components.release
 				artifact sourcesJar
 				artifact javadocJar
