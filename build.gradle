@@ -1,0 +1,125 @@
+buildscript {
+	repositories {
+		google()
+		jcenter()
+	}
+	dependencies {
+		classpath "com.android.tools.build:gradle:4.0.1"
+	}
+}
+plugins {
+	id "com.jfrog.bintray" version "1.8.1"
+}
+apply plugin : 'maven-publish'
+apply plugin: 'com.android.library'
+
+android {
+	compileSdkVersion 30
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_1_6
+		targetCompatibility JavaVersion.VERSION_1_6
+	}
+	defaultConfig {
+		minSdkVersion 21
+	}
+	buildTypes {
+		release {
+		}
+	}
+	variantFilter { variant ->
+		if(variant.buildType.name == 'debug') {
+			variant.setIgnore(true);
+		}
+	}
+	libraryVariants.all { variant ->
+		variant.outputs.all { output ->
+			if(output.outputFileName != null && output.outputFileName.endsWith('.aar')) {
+				outputFileName = "${archivesBaseName}-${version}.aar"
+			}
+		}
+	}
+}
+
+group = 'onl.oss.androidx'
+archivesBaseName = 'lifecycle-util'
+version = '0.1'
+
+repositories {
+	google()
+	jcenter()
+}
+
+dependencies {
+	implementation 'androidx.appcompat:appcompat:1.1.0'
+	implementation 'androidx.lifecycle:lifecycle-viewmodel:2.2.0'
+	implementation 'androidx.lifecycle:lifecycle-livedata:2.2.0'
+}
+
+defaultTasks 'clean', 'build'
+
+task javadoc(type: Javadoc) {
+	group "documentation"
+	description "Generates Javadoc API documentation for the main source code."
+	source = android.sourceSets.main.java.srcDirs
+	doFirst {
+		def release = android.libraryVariants.find { it.buildType.name == 'release'}
+		ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+		classpath = files(release.javaCompileProvider.get().classpath.files) + files(ext.androidJar)
+	}
+	options {
+		options.links("http://docs.oracle.com/javase/8/docs/api/")
+		options.links("http://developer.android.com/reference/")
+		setMemberLevel(JavadocMemberLevel.PROTECTED)
+		docEncoding = 'UTF-8'
+		encoding = 'UTF-8'
+		charSet = 'UTF-8'
+		options.stylesheetFile = new File(rootDir, 'javadoc.css')
+	}
+	exclude '**/BuildConfig.java'
+	exclude '**/R.java'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	group "documentation"
+	description "Generates Javadoc API documentation as a jar archive."
+	archiveClassifier = 'javadoc'
+	from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+	group "build"
+	description "Assembles a jar archive containing the main source code."
+	archiveClassifier = 'sources'
+	from android.sourceSets.main.java.srcDirs
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+bintrayUpload.dependsOn('build', 'javadocJar', 'sourcesJar', 'generatePomFileForMavenJavaPublication')
+afterEvaluate {
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				from components.release
+				artifact sourcesJar
+				artifact javadocJar
+			}
+		}
+	}
+}
+bintray {
+	user = System.getenv('BINTRAY_USER')
+	key  = System.getenv('BINTRAY_KEY')
+
+	publications = ['mavenJava']
+
+	pkg {
+		repo = 'maven'
+		name = 'androidx-lifecycle-util'
+		licenses = ['MIT']
+		vcsUrl = 'https://github.com/hirukawa/androidx-lifecycle-util'
+	}
+}
