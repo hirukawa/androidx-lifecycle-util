@@ -48,6 +48,9 @@ public class RestorableViewModelProvider implements LifecycleObserver {
         owner = activity;
         defaultState = activity.getIntent().getExtras();
         viewModelStore = getViewModelStoreByClass(activity.getClass());
+        if(!restore) {
+            viewModelStore.clear();
+        }
         if(activity instanceof ComponentActivity) {
             lifecycle = ((ComponentActivity)activity).getLifecycle();
             lifecycle.addObserver(this);
@@ -59,6 +62,9 @@ public class RestorableViewModelProvider implements LifecycleObserver {
         owner = fragment;
         defaultState = fragment.getArguments();
         viewModelStore = getViewModelStoreByClass(fragment.getClass());
+        if(!restore) {
+            viewModelStore.clear();
+        }
         lifecycle = fragment.getLifecycle();
         lifecycle.addObserver(this);
     }
