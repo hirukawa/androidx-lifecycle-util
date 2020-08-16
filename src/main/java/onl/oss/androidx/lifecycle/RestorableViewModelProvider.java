@@ -51,10 +51,8 @@ public class RestorableViewModelProvider implements LifecycleObserver {
         if(!restore) {
             viewModelStore.clear();
         }
-        if(activity instanceof ComponentActivity) {
-            lifecycle = ((ComponentActivity)activity).getLifecycle();
-            lifecycle.addObserver(this);
-        }
+        lifecycle = activity.getLifecycle();
+        lifecycle.addObserver(this);
     }
 
     public RestorableViewModelProvider(Fragment fragment, Bundle savedInstanceState) {
