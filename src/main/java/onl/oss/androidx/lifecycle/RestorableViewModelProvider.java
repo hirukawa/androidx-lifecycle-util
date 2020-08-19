@@ -143,7 +143,7 @@ public class RestorableViewModelProvider implements LifecycleObserver {
             File file = new File(dir, ".state-" + viewModelClass.getCanonicalName());
             try {
                 if(viewModelClass.isMemberClass() && !Modifier.isStatic(viewModelClass.getModifiers())) {
-                    throw new NoSuchMethodException("Inner classes that extend RestorableViewModel must be static");
+                    throw new NoSuchMethodException(viewModelClass.getSimpleName() + " must be a top level class or a static nested class");
                 }
                 Constructor<T> constructor = viewModelClass.getDeclaredConstructor();
                 constructor.setAccessible(true);
