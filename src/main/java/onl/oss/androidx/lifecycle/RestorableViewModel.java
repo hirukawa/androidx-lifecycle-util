@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RestorableViewModel extends ViewModel {
+public abstract class RestorableViewModel extends ViewModel {
 
     private static final String VALUES = "values";
     private static final String KEYS = "keys";
